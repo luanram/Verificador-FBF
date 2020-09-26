@@ -1,0 +1,161 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+//Considerando a variável Tempo resolvi não organizar a função Main, portanto "voilà"
+public class Desafio : MonoBehaviour
+{
+    string formula;
+    char[] chArray;
+    List <char> conectivos = new List<char>();
+    public GameObject inputField;
+    public Text textDisplay;
+    int ParenteseEsquerdo=0,ParenteseDireito=0,Length;
+    bool FBF1=true,IsNot;
+    void Start(){
+        conectivos.Add('^'); //E lógico
+        conectivos.Add('|'); //OU lógico
+        conectivos.Add('~'); //NÃO lógico
+        conectivos.Add('>'); //IMPLICAÇÃO
+        conectivos.Add('-'); //BI-IMPLICAÇÃO
+        conectivos.Add('('); //PARENTESE ESQUERDO
+        conectivos.Add(')'); //PARENTESE DIREITO
+    }
+    public void StoreFormula(){
+        FBF1=true;
+    	formula = inputField.GetComponent<Text>().text;
+        chArray = formula.ToCharArray();
+        Length = formula.Length;
+
+    //Verificando se todos os caracteres são validos: ou letras, ou conectivos.
+        for(int i = 0; i<Length-1;i++){ 
+            if(!char.IsLetter(chArray[i])){
+                if(!conectivos.Contains(chArray[i])){
+                    textDisplay.text = "Erro! o elemento ' " + chArray[i] + " ' não é um conectivo";
+                    FBF1=false;
+                }                               
+            }
+        } 
+        ParenteseDireito=0;
+        ParenteseEsquerdo=0;
+        //Verificando se todos os Parenteses abertos foram fechados
+        for(int i = 0; i<Length;i++){
+            if(chArray[i].Equals('(')){
+                ParenteseEsquerdo+=1;
+                if(conectivos.Contains(chArray[i+1])&&!chArray[i+1].Equals('~')&&!chArray[i].Equals('(')){
+                    textDisplay.text = "Erro! Conectivo Binário sem Operandos válidos";
+                    FBF1=false;
+                }                               
+            }else{
+                if(chArray[i].Equals(')')){
+                    ParenteseDireito+=1;
+                    if(conectivos.Contains(chArray[i-1])&&!chArray[i].Equals(')')){
+                        textDisplay.text = "Erro! Conectivo Binário sem Operandos válidos";
+                        FBF1=false;
+                    }                                       
+                }
+            }
+        }
+        if(ParenteseDireito!=ParenteseEsquerdo){
+            textDisplay.text = "Erro! Há parênteses que não foram fechados";
+            FBF1=false;
+        }
+        //==================== VERIFICANDO O PRIMEIRO ELEMENTO ====================//
+        if(chArray[0]=='^'||chArray[0]=='|'||chArray[0]=='>'||chArray[0]=='-'){ //Primeiro elemento da string é uma letra?
+            textDisplay.text = "Erro! Conectivo Binário sem Operandos válidos";
+            FBF1=false;    
+        }else{
+            if(char.IsLetter(chArray[0])==false && chArray[0].Equals('(')==false && !chArray[0].Equals('~')){
+                textDisplay.text = "Erro! o elemento ' " + chArray[0] + " ' não é válido";
+                FBF1=false;
+            }
+        }
+        //==================== VERIFICANDO O ULTIMO ELEMENTO ====================//
+        if(chArray[Length-1]=='^'||chArray[Length-1]=='|'||chArray[Length-1]=='>'||chArray[Length-1]=='-'){
+            textDisplay.text = "Erro! Conectivo Binário sem Operandos válidos";    
+            FBF1=false;
+        }else{
+            if(char.IsLetter(chArray[Length-1])==false && chArray[Length-1].Equals(')')==false){
+                textDisplay.text = "Erro! o elemento ' " + chArray[Length-1] + " ' não é válido";
+                FBF1=false;
+            }   
+        }
+        //!!!!!!!ATÉ AQUI FUNCIONA!!!!!!!!!
+        //Verificando se o Operando possui um conectivo: Operando seguido de parentese
+        for(int i = 0; i<Length;i++){ 
+            if(char.IsLetter(chArray[i])){
+                if(i!=0)
+                if(chArray[i-1].Equals(')')){
+                    textDisplay.text = "Erro! Operando sem conectivos válidos";
+                    FBF1=false;
+    
+                }                    
+            }
+        }//EX:A( , )A
+        for(int i = 0; i<Length-1;i++){ 
+            if(char.IsLetter(chArray[i])){
+                if(chArray[i+1].Equals('(')||!conectivos.Contains(chArray[i+1])){
+                    textDisplay.text = "Erro! Operando sem conectivos válidos";
+                    FBF1=false;
+                }                                       
+            }
+        }//EX: A~B
+        for(int i = 0; i<Length-2;i++){ 
+            if(char.IsLetter(chArray[i])){
+                if(chArray[i+1].Equals('~')&&char.IsLetter(chArray[i+2])){
+                    textDisplay.text = "Erro! Operando sem conectivos válidos";
+                    FBF1=false;
+                }                                  
+            }
+        }//EX: ~~~~A
+        for(int i = Length-1; i>=0;i--){ 
+            if(char.IsLetter(chArray[Length-1])){
+                if(chArray[i].Equals('~')){
+                    IsNot=true;
+                }else{
+                    IsNot=false;
+                }                    
+            }
+        }
+        if(IsNot){
+            textDisplay.text = "Erro! Conectivo Binário sem Operandos válidos";
+            FBF1=false;                        
+        }//EX: A
+        if((Length==1)&&char.IsLetter(chArray[Length-1])){
+            textDisplay.text = "Erro! Operando sem conectivos válidos";
+            FBF1=false;            
+        }
+    //Verificando se existem letras seguido de letra, ou conectivo seguido de conectivo, com exceção dos () e ~
+        for(int i = 0; i<Length-1;i++){
+            bool ElAtual = char.IsLetter(chArray[i]); //retorna true se o elemento atual é letra
+            bool ElSeguinte = char.IsLetter(chArray[i+1]); //retorna true se o elemento seguinte é letra  
+            if(ElAtual&&ElSeguinte){
+                textDisplay.text = "Erro! Operando sem conectivos válidos";
+                FBF1=false;
+            }    
+            else{
+                if(!ElAtual&&!ElSeguinte&&(!chArray[i].Equals('~')&&!chArray[i+1].Equals('~'))){
+                    if(chArray[i].Equals('(')||chArray[i+1].Equals('(')){
+                        continue;
+                    }else{
+                        if(chArray[i].Equals(')')||chArray[i+1].Equals(')')){
+                            continue;
+                        }else{
+                            if(chArray[i].Equals('~')||chArray[i+1].Equals('~')){
+                                continue;
+                            }else{
+                                FBF1=false;
+                                textDisplay.text = "Erro! Conectivo Binário sem Operandos válidos";
+                            } 
+                        }
+                    }
+                }
+            }
+        }
+        // print: FBF se: tudo ocorreu bem
+        if(FBF1){
+            textDisplay.text = "FORMULA BEM FORMADA!";    
+        }    
+    }
+}
