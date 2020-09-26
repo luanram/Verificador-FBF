@@ -1,6 +1,6 @@
 # Verificador-FBF
-Aluno: Francisco Luan Ramos de Menezes
-Liguagem: C# (C sharp)
+Aluno: Francisco Luan Ramos de Menezes\n
+Liguagem: C# (C sharp)\n
 Engine: Unity
 
 
